@@ -37,24 +37,8 @@
         {
             "name": "Win32",
             "includePath": [
-                  "${workspaceRoot}"
-                , "C:\\Users\\USER4\\Documents\\src\\win-builds\\include\\c++\\4.8.3"
-            ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE"
-            ],
-            "browse": {
-                "path": [],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
-            }
-        },
-        {
-            "name": "Win64",
-            "includePath": [
-                  "${workspaceRoot}"
-                , "C:\\Users\\USER4\\Documents\\src\\win-builds\\include\\c++\\4.8.3"
+                "${workspaceRoot}",
+                "C:/Users/USER4/Documents/src/win-builds/include/*"
             ],
             "defines": [
                 "_DEBUG",
