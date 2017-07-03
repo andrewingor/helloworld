@@ -38,16 +38,30 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceRoot}",
-                "C:/Users/USER4/Documents/src/win-builds/include/*"
-            ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE"
+                "C:/Users/USER4/win64/include/*"
             ],
             "browse": {
-                "path": [],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
+                "path": [
+                    "${workspaceRoot}",
+                    "C:/Users/USER4/win64/include/*"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+                
+            }
+        },
+        {
+            "name": "Win64",
+            "includePath": [
+                "${workspaceRoot}",
+                "C:/Users/USER4/win64/include/*"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceRoot}",
+                    "C:/Users/USER4/win64/include/*"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+                
             }
         }
     ]

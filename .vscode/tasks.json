@@ -4,6 +4,6 @@
     "version": "0.1.0",
     "command": "c++",
     "isShellCommand": true,
-    "args": ["-static-libstdc++", "hw-qt.cc", "-o", "hw-qt.exe"],
+    "args": ["goes.cc"],
     "showOutput": "always"
 }

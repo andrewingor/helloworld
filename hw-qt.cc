@@ -1,6 +1,3 @@
-#ifndef Win64
-#define Win64
-
 #include <qapplication.h>
 #include <qpushbutton.h>
 
@@ -16,5 +13,3 @@ int main( int argc, char **argv )
     hello.show();
     return a.exec();
 }
-
-#endif
