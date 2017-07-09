@@ -6,12 +6,12 @@
 
 using namespace std;
 
-main ()
+int main ()
 {
     std::string input;
     
     for(;;) {
-        cout << "press enter" << endl;
+        cout << "Type 'quit', stupid: " << flush;
         cin >> input;
         if (input.find("quit") != std::string::npos)
         return 0;

