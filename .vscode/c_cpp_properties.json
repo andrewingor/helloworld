@@ -15,7 +15,8 @@
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
-            }
+            },
+            "intelliSenseMode": "clang-x64"
         },
         {
             "name": "Linux",
@@ -32,7 +33,8 @@
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
-            }
+            },
+            "intelliSenseMode": "clang-x64"
         },
         {
             "name": "Win32",
@@ -46,8 +48,8 @@
                     "C:/Users/USER4/win64/include/*"
                 ],
                 "limitSymbolsToIncludedHeaders": true
-                
-            }
+            },
+            "intelliSenseMode": "msvc-x64"
         },
         {
             "name": "Win64",
@@ -61,8 +63,8 @@
                     "C:/Users/USER4/win64/include/*"
                 ],
                 "limitSymbolsToIncludedHeaders": true
-                
-            }
+            },
+            "intelliSenseMode": "msvc-x64"
         }
     ]
 }

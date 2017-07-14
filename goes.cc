@@ -17,25 +17,15 @@ try {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
-HWND hwnd = 0;
-DWORD proc = GetCurrentProcessId();
-do {
-     hwnd = FindWindowEx( NULL, hwnd, NULL, NULL );
-     DWORD pid = 0;
-     GetWindowThreadProcessId ( hwnd, &pid );
-     if ( pid == proc ) {
-         ShowWindow( hwnd, SW_HIDE );
-         break;
-     }
-} while ( hwnd != NULL );
+    ShowWindow( GetActiveWindow(), SW_HIDE );
 
     hide::line args("");
     args.decode();
 
     ZeroMemory( &si, sizeof(si) );
     si.cb = sizeof(si);
-    si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_HIDE;
+//  si.dwFlags = STARTF_USESHOWWINDOW;
+//  si.wShowWindow = SW_HIDE;
     ZeroMemory( &pi, sizeof(pi) );
 
     if( !CreateProcess ( NULL,   // No module name (use command line)

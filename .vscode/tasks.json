@@ -4,6 +4,6 @@
     "version": "0.1.0",
     "command": "c++",
     "isShellCommand": true,
-    "args": ["-static", "goes.cc"],
+    "args": ["-static", "killbot.cc"],
     "showOutput": "always"
 }
