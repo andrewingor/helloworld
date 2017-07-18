@@ -125,7 +125,7 @@ public:
     void decode () {
         string::operator= ( b64decode(data(), length()) );
 
-        if(size() < 10)
+        if(size() < 3)
                 throw out_of_range("small size of args");
 
         key8 = *(end()-1);

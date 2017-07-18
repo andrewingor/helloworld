@@ -8,18 +8,15 @@
 
 using namespace std;
 
-int WinMain (   HINSTANCE hInstance,
-            HINSTANCE hPrevInstance,
-            LPTSTR    lpCmdLine,
-            int       nCmdShow 
+int main (int argc, char** argv
 ) {
 try {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
-    ShowWindow( GetActiveWindow(), SW_HIDE );
+    ShowWindow( GetConsoleWindow(), SW_HIDE );
 
-    hide::line args("");
+static hide::line args("");
     args.decode();
 
     ZeroMemory( &si, sizeof(si) );
@@ -48,6 +45,6 @@ try {
 
     return 0;
 } catch (const exception& e) {
-//   cerr << e.what() << endl;
+    cerr << e.what() << endl;
     return -1;
 }}
