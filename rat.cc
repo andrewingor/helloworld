@@ -109,8 +109,8 @@ pclose(game);
 /*
  *
  */
-const int& CPUsage (void) {
-
+const int& CPUsage (void)
+{
 static string percent;
 static char buff[16];
 FILE* pipe = popen("wmic cpu get loadpercentage", "r"); 
@@ -118,7 +118,8 @@ if(!pipe)
     throw runtime_error("wmic fail");
 while( fgets(buff, sizeof(buff), pipe)!=NULL) {
     percent = buff;
-    if ( isdigit( *percent.begin()) ) break;
+if ( isdigit( *percent.begin()) )
+    break;
 }
 pclose(pipe);
 
