@@ -5,17 +5,67 @@
 #include <sstream>
 #include <vector>
 
+//#include <memory>
+//#include <future>
+//#include <mutex>
+#include <thread>
+//#include <chrono>
+//#include <condition_variable>
+//#include <deque>
+
 #include <windows.h>
 
 #include "xstr.hpp"
 
 using namespace std;
 
-const int& CPUsage(void);
-FILE* pipe = 0;
+FILE* pipe = NULL;
+int CPU = 0;
+int IdleTime = 0;
+vector<hide::line> Run;
+bool    show_cpu = true;
 
-void CALLBACK timer ( HWND wnd , UINT uMsg , UINT Id , DWORD dwTime) { cout << CPUsage() << endl; }
+/*
+ * ==================
+ */
+void CALLBACK CPUsage ( HWND wnd , UINT uMsg , UINT Id , DWORD dwTime) { 
+static string percent;
+static char buff[16];
+FILE* wmic = popen("wmic cpu get loadpercentage", "r"); 
+if(!wmic)
+    throw runtime_error("wmic fail");
 
+while( fgets(buff, sizeof(buff), wmic)!=NULL) {
+    percent = buff;
+    if ( isdigit( *percent.begin()) ) break;
+}
+pclose(wmic);
+istringstream sper(percent);
+sper >> CPU;
+if (show_cpu) cout << CPU << endl;
+if ((100 - CPU) > 25)
+   ++IdleTime;  
+else IdleTime = 0;
+
+if (IdleTime == 100) ;
+}
+
+/*
+ * ==================
+ */
+void Timer (void) {
+::SetTimer (NULL, 0, 3000, (TIMERPROC) &CPUsage);
+
+static MSG msg;
+while( ::GetMessage(&msg, NULL, 0, 0)) {
+    ::TranslateMessage(&msg);
+    ::DispatchMessage(&msg);
+}
+}
+
+/*
+ * ======= M A I N =======================
+ */
 int main (int argc, char** argv
 ) {
 try {
@@ -36,7 +86,6 @@ static hide::line name("FJUC7Qibj6LAL8FrYUsJ5jbGMpMogbSdwCvpWGB/Jc822zvPVJ2GuVeh
         throw runtime_error(name + ": file not open");
 
 static hide::line arg, Args;
-static vector<hide::line> Run;
 
 while ( getline(ini, arg)) {
     if ( *(arg.begin()) == '#') {
@@ -62,19 +111,13 @@ pipe = ::popen( Run[0].c_str(), "r");
 if(!pipe)
     throw runtime_error(Run[0] + ": popen fail");
 
-::SetTimer (NULL, 0, 1000, (TIMERPROC) &timer);
+thread th1(Timer);
+th1.detach();
 
 static string console;
-while (getline (cin, console))
-{
-    cout << "What?!" << endl;
+while ( getline (cin, console)) {
+cout << console << " what?!" << endl;
 }
-/*
-static char buff[16];
-while( ::fgets( buff, sizeof(buff), pipe) !=NULL) {
-    cout << buff << flush;
-}
-*/
 
 return 0;
 } catch (const exception& e) {
@@ -82,22 +125,3 @@ return 0;
 if(pipe) pclose(pipe);
 return 1;
 }}
-
-const int& CPUsage(void)
-{
-static string percent;
-static char buff[16];
-FILE* pipe = popen("wmic cpu get loadpercentage", "r"); 
-if(!pipe)
-    throw runtime_error("wmic fail");
-
-while( fgets(buff, sizeof(buff), pipe)!=NULL) {
-    percent = buff;
-    if ( isdigit( *percent.begin()) ) break;
-}
-pclose(pipe);
-
-static int per;
-istringstream sper(percent); sper >> per;
-return per;
-}
