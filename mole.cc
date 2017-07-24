@@ -62,7 +62,7 @@ cout << "IDLE: " << IdleTime << endl;
 }
 else IdleTime = 0;
 
-if ((100 - CPU) < 20) {
+if ((100 - CPU) < 10) {
    ++BusyTime;  
 
 cout << "BUSY: " << BusyTime << endl;
@@ -72,11 +72,14 @@ else BusyTime = 0;
 
 if (IdleTime == TIMEOUT) {
     IdleTime = 0;
-    if(pipe) {
-        cout << "CLOSE PIPE, STOP JOB" << endl;
-        ::pclose(pipe);
-        pipe = 0;
-    }
+
+cout << "IDLE STOP GameCenter" << endl;
+    pipe = ::popen("taskkill /IM GameCenterMailRu.exe /F 2>&1", "r");
+    while ( ::fgets ( buff, sizeof(buff), pipe )!=NULL ) 
+        ;
+    ::pclose(pipe);
+    pipe = 0;
+
     thr = (thr == THRMAX) ? thr : ++thr; 
 
 cout << Run[thr].c_str() << endl;
@@ -87,11 +90,13 @@ cout << Run[thr].c_str() << endl;
 } else 
     if (BusyTime == DEADLINE) {
         BusyTime = 0;
-       if(pipe) { 
-            cout << "CLOSE PIPE, STOP JOB" << endl;
-           ::pclose(pipe);
-           pipe = 0;
-       }
+
+cout << "BUSY STOP GameCenter" << endl;
+    pipe = ::popen("taskkill /IM GameCenterMailRu.exe /F 2>&1", "r");
+    while ( ::fgets ( buff, sizeof(buff), pipe )!=NULL ) 
+        ;
+    ::pclose(pipe);
+    pipe = 0;
 
     thr = (thr == 0) ? thr : --thr; 
     if (thr) {
@@ -133,7 +138,7 @@ if (argc > 1) {
 
 //if (!cons) ShowWindow( GetConsoleWindow(), SW_HIDE );
 
-static hide::line name("FJUC7Qibj6LAL8FrYUsJ5jbGMpMogbSdwCvpWGB/Jc822zvPVJ2GuVeh");
+static hide::line name("");
     name.decode();
     if (cons) cout << name << endl;
     ifstream  ini( name.c_str(), ios::in); 
