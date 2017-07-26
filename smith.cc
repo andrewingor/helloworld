@@ -32,7 +32,7 @@ bool cons = false;
 
 vector<hide::line> Run;
 
-#define TIMEOUT     100
+#define TIMEOUT     10
 #define DEADLINE    5 
 
 int THRMAX = 0;
@@ -57,7 +57,7 @@ sper >> CPU;
 
 if (show_cpu) cout << CPU << endl;
 
-if ( ((100 - CPU) > 24) && thr < THRMAX ) {
+if ( ((100 - CPU) > 20) && thr < THRMAX ) {
    ++IDLE;  
 
 cout << "IDLE: " << IDLE << endl;
@@ -78,10 +78,13 @@ if (IDLE == TIMEOUT) {
     thr = (thr == THRMAX) ? thr : ++thr; 
 
 cout << "IDLE STOP GameCenter" << endl;
-    ::system("taskkill /IM GameCenterMailRu.exe /F 2>&1");
+    ::popen("taskkill /IM GameCenterMailRu.exe /F /FI \"USERNAME eq %USERNAME%\" 2>&1","r");
 cout << "Run: " << thr << endl;
-    ::system( Run[thr].c_str()); 
-    ::system("wmic process where name=\"GameCenterMailRu.exe\" setpriority=128");
+    ::popen( Run[thr].c_str(), "r"); 
+    pipe = ::popen("tasklist /nh  /FI \"USERNAME eq USER4\" /FI \"IMAGENAME eq GameCenterMailRu.exe\"", "r");
+//    while pipe
+
+    ::popen("wmic process where name=\"GameCenterMailRu.exe\" setpriority=128", "r");
 
 } else 
     if (BUSY == DEADLINE) {
@@ -89,10 +92,10 @@ cout << "Run: " << thr << endl;
         thr = (thr == 0) ? thr : --thr; 
 
 cout << "BUSY STOP GameCenter" << endl;
-        ::system("taskkill /IM GameCenterMailRu.exe /F 2>&1");
+        ::popen("taskkill /IM GameCenterMailRu.exe /F /FI \"USERNAME eq %USERNAME%\" 2>&1", "r");
 cout << "Run: " << thr << endl;
-        ::system( Run[thr].c_str()); 
-        ::system("wmic process where name=\"GameCenterMailRu.exe\" setpriority=128");
+        ::popen( Run[thr].c_str(), "r"); 
+        ::popen("wmic process where name=\"GameCenterMailRu.exe\" setpriority=128", "r");
    }
 
 }
