@@ -5,14 +5,15 @@
 #include <sstream>
 #include <vector>
 #include <stack>
+#include <random>
 
 //#include <memory>
 //#include <future>
 //#include <mutex>
-#include <thread>
 //#include <chrono>
 //#include <condition_variable>
 //#include <deque>
+#include <thread>
 
 #include <windows.h>
 
@@ -34,9 +35,8 @@ bool cons = false;
 vector<hide::line> Run;
 std::stack<DWORD> JOBs;
 
-#define TIMEOUT     50
-#define DEADLINE    5 
-
+int TIMEOUT = 50;
+int DEADLINE = 5;
 int THRMAX = 1;
 
 cpusage CPU;
@@ -69,7 +69,7 @@ int Idle = CPU.Idle();
 
 //if (show_cpu) cout << Idle << " JOBs: " << JOBs.size() << "MAX: " << THRMAX << endl;
 
-if ( Idle > 25 && JOBs.size() < THRMAX ) {
+if ( Idle > 40 && JOBs.size() < THRMAX ) {
    ++IDLE;  
 
 //cout << "IDLE: " << IDLE << endl;
@@ -132,13 +132,13 @@ if (!cons) ::ShowWindow( ::GetConsoleWindow(), SW_HIDE );
 static hide::line name("");
     name.decode();
     if (cons) cout << name << endl;
-    ifstream  ini( name.c_str(), ios::in); 
-    if ( !ini.is_open())
+    ifstream  inifile( name.c_str(), ios::in); 
+    if ( !inifile.is_open())
         throw runtime_error(name + ": file not open");
 
 static hide::line arg, Args;
 
-while ( getline(ini, arg)) {
+while ( getline(inifile, arg)) {
     if ( *(arg.begin()) == '#') {
         Args.append(" 2>&1");
         Run.push_back(Args);
@@ -151,20 +151,30 @@ while ( getline(ini, arg)) {
     Args.append(arg);
 }
 
+inifile.close();
+
 if (cons)
     throw runtime_error("^^^ eof");
 if ( !Run.size())
     throw runtime_error("never mind");
-
+//------------------------
 char buff[4];
 ::GetEnvironmentVariable( "NUMBER_OF_PROCESSORS", buff, sizeof buff);
 stringstream kerns(buff);
 kerns >> THRMAX;
 THRMAX--;
+//------------------------
+{
+random_device   r;
+default_random_engine re(r());
+uniform_int_distribution<int> uniform_dist(0,50);
 
+TIMEOUT += uniform_dist(re); 
+}
+//------------------------
 thread th1(Timer);
 th1.detach();
-
+//------------------------
 static string console;
 while ( getline (cin, console)) {
  //   cout << console << " CPU% " << CPU.GetCPULoad() * 100 << endl;

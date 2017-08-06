@@ -4,6 +4,6 @@
     "version": "0.1.0",
     "command": "c++",
     "isShellCommand": true,
-    "args": ["-static", "-std=c++11", "smith.cc"],
+    "args": ["-static", "-std=c++11", "blacksmith.cc"],
     "showOutput": "always"
 }
