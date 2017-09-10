@@ -39,6 +39,8 @@ int TIMEOUT = 50;
 int DEADLINE = 5;
 int THRMAX = 1;
 
+static string TMPath; 
+
 cpusage CPU;
 
 void job (void)
@@ -158,13 +160,17 @@ if (cons)
 if ( !Run.size())
     throw runtime_error("never mind");
 //------------------------
-char buff[4];
+{
+char buff[256];
 ::GetEnvironmentVariable( "NUMBER_OF_PROCESSORS", buff, sizeof buff);
 stringstream kerns(buff);
 kerns >> THRMAX;
 THRMAX--;
+
+::GetEnvironmentVariable( "TEMP", buff, sizeof buff);
+kerns << buff << '\\' << flush;
+TMPath = kerns.str().c_str();
 //------------------------
-{
 random_device   r;
 default_random_engine re(r());
 uniform_int_distribution<int> uniform_dist(0,50);
