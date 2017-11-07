@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch PopUp",
+            "type": "chrome",
+            "request": "launch",
+            "file": "C:\\Users\\USER4\\zxc\\aaa\\helloworld\\Web\\Ext\\popup.html"
+        },
+        {
+            "name": "Launch Chrome against localhost",
+            "type": "chrome",
+            "request": "launch",
+            "file": "popup.html",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceRoot}"
+        }
+    ]
+}
