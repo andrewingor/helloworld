@@ -5,7 +5,7 @@
             "name": "Launch PopUp",
             "type": "chrome",
             "request": "launch",
-            "file": "C:\\Users\\USER4\\zxc\\aaa\\helloworld\\Web\\Ext\\popup.html"
+            "file": "C:\\Users\\USER4\\zxc\\helloworld\\Web\\Ext\\popup.html"
         },
         {
             "name": "Launch Chrome against localhost",

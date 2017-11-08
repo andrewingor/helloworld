@@ -1,16 +1,25 @@
 {
   "manifest_version": 2,
 
-  "name": "Getting started example",
-  "description": "This extension allows the user to change the background color of the current page.",
-  "version": "1.0",
+  "name": "BitRate",
+  "description": "CryptoCoins Rates and Charts",
+  "version": "$Id$",
+
+  "default_locale": "en",
+  "icons": { },
 
   "browser_action": {
-    "default_icon": "bitrate.png",
+    "default_icon": "icons/bitrate.png",
+    "default_title": "BitRate",
     "default_popup": "popup.html"
   },
+
   "permissions": [
+    "debugger",
     "activeTab",
-    "storage"
+    "alarms",
+    "storage",
+    "WebRequest",
+    "https://api.coinmarketcap.com/v1/ticker/?convert=USD"
   ]
 }
